@@ -1,0 +1,12 @@
+[project]
+name = "tiny-llm-edge"
+version = "0.1.0"
+description = "Lab mini-course: train a tiny LLM and deploy it on ESP32"
+requires-python = ">=3.10"
+dependencies = [
+    "torch>=2.0",
+    "numpy",
+    "sentencepiece",
+    "requests",
+    "tqdm",
+]

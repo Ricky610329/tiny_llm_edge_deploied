@@ -1,0 +1,8 @@
+.venv/
+bin/
+__pycache__/
+models/*
+!models/tok512.bin
+!models/tok512.model
+train/llama2.c/data/
+train/llama2.c/out*/
