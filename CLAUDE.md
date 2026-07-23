@@ -16,17 +16,28 @@
 ```bash
 # Windows：gcc 在 MSYS2，必須先加 PATH（DLL 相依，直接呼叫完整路徑會靜默失敗）
 export PATH="/c/msys64/ucrt64/bin:$PATH"
-bash tools/build.sh          # 產出 bin/{run,runq,eval_bpb_q,eval_bpb_f32}.exe
+bash tools/build.sh          # bin/{run,runq,eval_bpb_q,eval_bpb_f32}(+host_engine 若有 model_data.h)
 
 uv sync                      # Python 環境（torch CPU）
 uv run python tools/quantize.py models/xxx.pt models/xxx_q80.bin
+uv run python tools/export_header.py models/xxx_q80.bin models/tok512.bin  # → firmware 的 model_data.h
 ./bin/eval_bpb_q.exe models/xxx_q80.bin -z models/tok512.bin -f eval/validation_100.txt -w 128
+
+# firmware 改動後的驗證：host_engine 與 runq 同參數輸出必須逐字一致
+./bin/host_engine.exe -t 0.8 -s 42 -n 100 -i "Once upon a time"
 ```
 
 ## 關鍵技術決策
 
-- **Worst-case 硬體設計**：假設無 PSRAM 的 ESP32-WROOM。權重不進 RAM——firmware 用
-  `esp_partition_mmap()` 直接映射 flash 分割區；RAM 只放 KV cache（部署 seq_len=128）。
+- **Worst-case 硬體設計**：假設無 PSRAM 的 ESP32-WROOM。權重不進 RAM——模型經
+  `tools/export_header.py` 轉成 const 陣列編進 app（rodata 即 flash memory-map，
+  與 esp_partition_mmap 同一條 cache 路徑）；RAM 只放 KV cache（部署 seq_len clamp 128）。
+- **Firmware 兩線共用一份 engine**：單一來源 `firmware/tinyllm_arduino/llm_engine.h`
+  （Arduino 主線；`tinyllm_idf/` 用 INCLUDE_DIRS 引用它）。engine **故意 naive**
+  （單核、scalar、fp32 KV）——優化是學生第 4 堂作業，不要幫他們做。
+  相對 runq.c 的四個刻意修改見檔頭註解（embedding 即時反量化省 131KB、memcpy 對齊等）。
+- **改 engine 後必驗**：重跑 `tools/build.sh` 後 `bin/host_engine` 與 `bin/runq` 同參數
+  輸出須逐字一致。注意逐字一致要求相同浮點旗標（FMA 融合會讓取樣在 ~55 token 後分岔）。
 - **量化陷阱**：`runq.c` 的分組 matmul 在維度非 group size 倍數時**靜默算錯**
   （stories260K 的 hidden_dim=172 + GS=64 → 輸出全是 "there"）。一律用 `tools/quantize.py`
   （自動退 GS），不要直接用 `train/llama2.c/export.py`。
@@ -36,7 +47,6 @@ uv run python tools/quantize.py models/xxx.pt models/xxx_q80.bin
 
 ## 待辦
 
-- `firmware/`：ESP-IDF skeleton（mmap 載權重 + runq 移植，**故意保持 naive**：單核、scalar、
-  fp32 KV——優化是學生的第 4 堂作業，不要幫他們做）。
+- 板上實測（使用者自己測 Arduino 與 IDF 兩路線）；速度數字出來後定案競賽 Gate 門檻。
 - 使用者的 ESP32 型號未確認（可能無 PSRAM）；接上後用 `esptool.py flash_id` 認板子。
-- 板上實測速度後定案競賽 Gate 門檻。
+- Repo 推上 GitHub 後，把 URL 填進 `notebooks/lecture1.ipynb`（Colab clone 需要）。

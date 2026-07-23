@@ -13,6 +13,7 @@
 
 ```bash
 uv run python student/budget_calc.py --check
+# Colab 上直接：python student/budget_calc.py --check（純標準庫，不需任何安裝）
 ```
 
 `--check` 用 baseline 模型的**實測數字**當 ground truth——三個函式都對了才會全部 PASS。

@@ -6,3 +6,7 @@ models/*
 !models/tok512.model
 train/llama2.c/data/
 train/llama2.c/out*/
+firmware/tinyllm_arduino/model_data.h
+firmware/tinyllm_idf/build/
+firmware/tinyllm_idf/sdkconfig
+firmware/tinyllm_idf/managed_components/

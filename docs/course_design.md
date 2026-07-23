@@ -98,6 +98,32 @@ Baseline 參考（stories260K，凍結驗證集 `eval/validation_100.txt`，w=12
 
 ---
 
+### 2.5 部署實作路線（2026-07 定案，取代 2.1 的 partition 方案）
+
+最終做法比 `esp_partition_mmap()` 更簡單：**模型用 `tools/export_header.py` 轉成 C header、
+以 `const` 陣列直接編進 app**。ESP32 的 rodata 本來就放 flash、經 flash cache 自動 memory-map——
+與 partition mmap 走同一條硬體路徑、同樣效能，但 partition table / esptool 燒錄 / menuconfig 全部消失。
+
+- **主線 = Arduino**（`firmware/tinyllm_arduino/`）：新生友善，Tools 選單即所有設定；
+  `build_opt.h` 已放 `-O3`（Arduino 預設 `-Os`）。Partition Scheme 選 Huge APP。
+- **側線 = ESP-IDF**（`firmware/tinyllm_idf/`）：加分選配，教正規工作流。
+  兩線共用同一份 `llm_engine.h`（單一來源放 Arduino sketch 資料夾，IDF 用 INCLUDE_DIRS 引用）。
+- **工具鏈分階段**：第 1–3 堂全在 Colab（gcc、torch 都預裝，學生零安裝），
+  第 4 堂才裝 Arduino IDE。本機 gcc 只有助教需要。
+
+`llm_engine.h` 相對 runq.c 的四個刻意修改（都有教學意義，詳見檔頭註解）：
+1. **embedding 表不預先反量化**——runq.c 會把整張表反量化到 RAM（stories260K = 131KB！），
+   單這一項就會炸掉 WROOM 的 heap。改成 per-token 即時反量化，數學完全相同。
+2. seq_len clamp 到 128（部署規格），KV cache 依 clamp 後的值配置。
+3. 不對齊的欄位一律 memcpy——x86 上未對齊讀取只是慢，Xtensa 上直接 crash，host 測不出來。
+4. I/O 抽象成 `LLM_PUTS/LLM_MILLIS/LLM_LOGF`，同一份檔案跑 Arduino / IDF / host。
+
+**驗證方法**：`bin/host_engine`（`firmware/host_test.c`）在 PC 上編譯「將燒進板子的同一份
+engine + model_data.h」，與 runq 同參數（`-t 0.8 -s 42 -n 100`）輸出**逐字一致**（2026-07-24 實測）。
+注意：逐字一致要求相同的浮點 codegen——`-O2` 與 `-O3 -march=native` 會因 FMA 融合在
+~55 token 後取樣分岔（數值差 <1e-6，BPB 無感，但文字會不同）。build.sh 已用相同旗標。
+板上 Xtensa FPU 的捨入也可能有最後一位差異：品質榜計分以 host 端 `eval_bpb_q` 為準，速度榜在板上量。
+
 ## 3. 課程結構（4 堂課，CS336 極短版）
 
 每堂 2–3 小時（半講半做），課後各一份作業。假設新生會 Python、修過基礎 ML。
