@@ -1,0 +1,78 @@
+# TinyLLM on ESP32 — 實驗室迷你課程
+
+四堂課，完整走一遍：**訓練極小 LLM → Q8_0 量化 → 部署到 ESP32 → 優化與競賽**。
+兩個排行榜：解碼速度（tok/s）、可部署前提下的最低 bits-per-byte。
+
+## 課程
+
+| 堂 | 主題 | 講義 |
+|---|---|---|
+| 1 | 語言模型在做什麼？（黑盒子玩法 + 評估指標） | [lecture1](docs/handouts/lecture1.md) |
+| 2 | 設計並訓練你的參賽模型（架構 + 預算） | [lecture2](docs/handouts/lecture2.md) |
+| 3 | 量化與推論系統 | [lecture3](docs/handouts/lecture3.md) |
+| 4 | 部署、優化、競賽 | [lecture4](docs/handouts/lecture4.md) |
+
+作業與競賽規則都在講義裡。助教請看 `docs/course_design.md`（含解答——先自己做完再翻）。
+
+## 目錄結構
+
+```
+docs/handouts/  四堂課講義（學生入口）
+docs/           課程設計文件（助教版）
+train/          vendored llama2.c（訓練 + host 端推論參考實作）
+student/        作業骨架（budget_calc.py：補完 TODO 並通過 --check）
+tools/          quantize.py（量化）、make_valset.py（凍結驗證集）、build.sh
+eval/           eval_bpb.c（BPB 評分器，與 runq.c 逐位元一致）、validation_100.txt（凍結驗證集）
+models/         模型檔（gitignore；統一 tokenizer tok512 除外）
+bin/            編譯產物（gitignore）
+firmware/       ESP-IDF 專案（待硬體到位）
+```
+
+## 環境需求
+
+- **C 編譯器**：gcc（Windows 用 [MSYS2](https://www.msys2.org/) ucrt64，Linux/Mac 原生）
+- **Python**：[uv](https://docs.astral.sh/uv/)，`uv sync` 一鍵裝好（torch CPU 版即可）
+- 訓練用 GPU：免費 Colab 就夠（本課程的模型量級幾分鐘～半小時可收斂）
+
+## 快速開始（第 1 堂課前完成）
+
+```bash
+# 0. Python 環境
+uv sync
+
+# 1. 編譯（Windows Git Bash 先：export PATH="/c/msys64/ucrt64/bin:$PATH"）
+bash tools/build.sh
+
+# 2. 下載 baseline 模型放到 models/
+#    https://huggingface.co/karpathy/tinyllamas/tree/main/stories260K
+#    需要：stories260K.bin、stories260K.pt（tok512 已隨 repo 提供）
+
+# 3. 生成一個故事
+./bin/run.exe models/stories260K.bin -z models/tok512.bin -t 0.8 -n 200 -i "Once upon a time"
+```
+
+## Baseline（等你來打敗）
+
+stories260K（Karpathy 預訓練，260K 參數），凍結驗證集 `eval/validation_100.txt`、w=128：
+
+| 模型 | 大小 | BPB |
+|---|---|---|
+| fp32 | 1,056,540 B | 0.8132 |
+| Q8_0 | 521,728 B | 0.8135 |
+
+品質榜的目標：**在通過部署門檻的前提下，BPB 低於 0.8135**。
+
+## 競賽規格（摘要）
+
+- **門檻**：裁判板上燒錄成功、seq_len=128 完整生成 100 tokens 不 crash、≥ 1 tok/s。
+- **速度榜**：固定 prompt、greedy、200 tokens，量 tok/s（按晶片型號分組）。
+- **品質榜**：凍結驗證集 BPB，一律用**部署的那份量化權重**計分，最低者勝。
+
+完整規則見 [lecture4](docs/handouts/lecture4.md)。
+
+## 狀態
+
+- [x] Host 端 pipeline（編譯、量化、推論、BPB 評分、凍結驗證集）
+- [x] 四堂課講義 + 作業骨架
+- [ ] ESP-IDF firmware skeleton — 等硬體
+- [ ] 板上 baseline 速度實測 → 定案速度門檻
