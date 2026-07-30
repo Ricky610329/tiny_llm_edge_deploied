@@ -3,6 +3,14 @@
 > **本文件是助教版**：含作業解答、刻意設下的坑、以及每堂課「講什麼／不講什麼」的節奏設計。
 > 學生入口是 [README](../README.md) 與 [docs/handouts/](handouts/)。學生翻到這份也無妨——先自己做完再看。
 
+> **2026-07-31 課程重定位**：應教授要求，主線改為 **2 小時 workshop**（新生熟悉課：
+> code 全提供、順跑一遍、不出作業、優化只留懸念）——見 `handouts/workshop.md` 與
+> `notebooks/workshop.ipynb`。本文件描述的四堂深度版**完整保留**於 `docs/advanced/`
+> 作為延伸挑戰；競賽降級為選配彩蛋（紀錄：19.67 tok/s、BPB 0.8135）。
+> 資料路線也隨之迷你化：`tools/fetch_shards.py` 只抓 2 個分片（~280MB），
+> tokenizer 與訓練都在其上進行，整條鏈 2026-07-31 本機實測通過
+> （自練 tok512 → pretokenize → 訓練(hidden=192, GS=64 乾淨) → 量化 292KB → 推論 → header）。
+
 > 定位：CS336（Stanford, Language Modeling from Scratch）的極短濃縮版。
 > 目標：新生親手「訓練一個極小的 LLM → 量化 → 部署到 ESP32 → 跑 benchmark 比賽」。
 > 基礎程式碼：Andrej Karpathy 的 `llama2.c`（MIT 授權，訓練端 `train.py` + 純 C 推論 `run.c` / `runq.c`）。

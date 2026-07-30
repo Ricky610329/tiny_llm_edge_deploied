@@ -1,12 +1,14 @@
 # CLAUDE.md
 
-實驗室新生教材：CS336 極短版——訓練極小 LLM（llama2.c + TinyStories）、Q8_0 量化、部署到 ESP32，
-比兩個 benchmark（tok/s 速度榜、可部署前提下最低 BPB 品質榜）。
+實驗室新生教材。**主線 = 2 小時 workshop**（2026-07-31 重定位）：資料→自練 BPE tokenizer→
+訓練極小 LLM→Q8_0 量化→部署 ESP32，code 全提供順跑一遍（`notebooks/workshop.ipynb` +
+`docs/handouts/workshop.md`）。深度版（4 堂+作業+競賽）保留在 `docs/advanced/` 當延伸挑戰。
 
 ## 教材鐵律
 
-- **學生版（README、docs/handouts/、student/）不放答案**：公式、坑的解釋、優化 code 只放
-  `docs/course_design.md`（助教版）。改學生文件前先看助教版 §6 的「給／不給」表。
+- **學生版（README、docs/handouts/、docs/advanced/、student/）不放答案**：公式、坑的解釋、
+  優化 code 只放 `docs/course_design.md`（助教版）。改學生文件前先看助教版 §6 的「給／不給」表。
+- **Workshop 的懸念不能破**：優化方向（QIO、雙核、fp16 KV）只給名字，不給 code、不給細節。
 - `eval/validation_100.txt` 是凍結的 benchmark，**永遠不要重生成或修改**。
 - 評分規則：品質榜一律用部署的量化權重計分；`eval/eval_bpb.c` 靠 `#include runq.c`
   保持與部署端逐位元一致，不要改寫成獨立實作。
@@ -19,6 +21,7 @@ export PATH="/c/msys64/ucrt64/bin:$PATH"
 bash tools/build.sh          # bin/{run,runq,eval_bpb_q,eval_bpb_f32}(+host_engine 若有 model_data.h)
 
 uv sync                      # Python 環境（torch CPU）
+uv run python tools/fetch_shards.py --n 2   # 迷你資料路線：只抓 2 個 TinyStories 分片
 uv run python tools/quantize.py models/xxx.pt models/xxx_q80.bin
 uv run python tools/export_header.py models/xxx_q80.bin models/tok512.bin  # → firmware 的 model_data.h
 ./bin/eval_bpb_q.exe models/xxx_q80.bin -z models/tok512.bin -f eval/validation_100.txt -w 128
