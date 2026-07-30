@@ -53,6 +53,7 @@ Gate 定案 ≥1 tok/s（形式門檻）。細節見 docs/course_design.md §2.6
 
 ## 待辦
 
-- ESP-IDF 側路線尚未上板驗證（Arduino 路線已通）。
+- ESP-IDF 側路線**決定不驗證**（2026-07-30）：保留為實驗性選配，教材已誠實標示；
+  engine 共用已驗證，IDF 殼層由選它的學生自行排錯。不要主動幫忙裝 IDF。
 - Repo：https://github.com/Ricky610329/tiny_llm_edge_deploied ——**目前 private**，
   開課前要轉 public（Colab notebook 的 `git clone` 才會通），或改發 token。

@@ -52,11 +52,15 @@ bash tools/build.sh   # 會多編出 bin/host_engine
 # 輸出應該和 bin/runq 用同參數跑的結果一致（優化不該改變數學）
 ```
 
-## 側路線：ESP-IDF（加分，選配）
+## 側路線：ESP-IDF（加分，選配，實驗性）
 
 `firmware/tinyllm_idf/` 是同一顆 engine 的 ESP-IDF 專案（`idf.py set-target esp32 && idf.py flash monitor`）。
 想學業界正規嵌入式工作流（menuconfig、sdkconfig、CMake components）的人走這條，
 完成者在結報加分。兩條路線的成績同榜計算——比的是模型和優化，不是框架。
+
+注意：ESP-IDF 工具鏈安裝門檻高（數 GB），且**此路線助教未上板驗證過**——engine 本體與
+Arduino 路線共用（已驗證），但 IDF 專案殼層可能有小問題要自己排。敢當第一個吃螃蟹的人，
+排錯過程本身就值得寫進結報。
 
 ## 競賽規則
 

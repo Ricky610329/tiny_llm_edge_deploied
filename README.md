@@ -88,4 +88,4 @@ naive engine（單核 / scalar / fp32 KV）：**19.67 tok/s**，init 後剩餘 h
 - [x] Arduino sketch + ESP-IDF 專案骨架（兩線共用 engine；**尚未上板實測**）
 - [x] Repo 上 GitHub、notebook 已填 URL（**repo 目前 private：開課前需轉 public，Colab 的 clone 才會通**）
 - [x] Arduino 路線板上實測（19.67 tok/s baseline）；速度門檻定案 ≥1 tok/s（形式門檻，實質約束為 flash/RAM 預算）
-- [ ] ESP-IDF 側路線上板驗證
+- ESP-IDF 側路線：保留為實驗性選配，不排程驗證（engine 與 Arduino 路線共用、已板上驗證；IDF 殼層由走此線的學生自行排錯）
