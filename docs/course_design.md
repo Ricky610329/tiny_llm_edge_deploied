@@ -257,7 +257,15 @@ Ground truth（stories260K 實測，`--check` 用的就是這三個數）：para
 
 ### 各堂思考題要點
 
-- 1-3（window 掃描）：context 越長、預測越準、BPB 越低——這是 KV cache 值得花 RAM 的第一手證據。
+- 1-3（window 掃描）：**注意，直覺答案是錯的，實測方向相反**（2026-07-30 實測：
+  w=64 → 0.7283、w=128 → 0.8132、w=256 → 0.8768，BPB 隨 w **上升**）。
+  機制：w 不改變任何單一位置的難度（每個位置都從故事開頭有完整前文），只決定平均算到故事多深。
+  對 260K 模型 × TinyStories，「難度-位置」曲線是上升的：開頭公式化（模型背熟了，超便宜）、
+  越深情節越難猜、而迷你模型從長 context 撈到的增益太小蓋不過去。大模型上通常相反
+  （per-position loss 下降 = in-context learning 曲線）——曲線方向是模型容量的指紋。
+  改作業時：學生若答「context 越長越好猜所以 BPB 下降」= 沒跑實驗或沒看數據；
+  能答到「w 只改變評分覆蓋的位置範圍 + 開頭被背熟」才算懂。
+  另注意：品質榜固定 w=128 的理由是「與部署 context 一致」，不是「越長越準」。
 - 1-4：LM 的 loss 就是壓縮率下界（arithmetic coding），BPB 0.81 ≈ 每 byte 壓到 0.1 byte。
 - 2 思考題：val loss（nats/token）× 1/ln2 = bits/token，再除以 bytes/token（≈2.19，from eval 輸出 27821/12685）≈ BPB。對不上的主因：訓練 val 是隨機 window、eval 是每篇開頭 + w=128。
 - 3c（roofline）：每 token 讀整份權重（每個矩陣都參與一次 matmul）→ 上限 = 頻寬/模型大小。20MB/s ÷ 272KB ≈ 75 tok/s；GS=4 膨脹到 509KB 就只剩 ~40——這是量化坑的速度後果。
