@@ -68,6 +68,10 @@ stories260K（Karpathy 預訓練，260K 參數），凍結驗證集 `eval/valida
 
 品質榜的目標：**在通過部署門檻的前提下，BPB 低於 0.8135**。
 
+**板上 baseline（2026-07-30 實測）**：ESP32-D0WD-V3（WROOM、無 PSRAM、4MB flash）、
+naive engine（單核 / scalar / fp32 KV）：**19.67 tok/s**，init 後剩餘 heap 147KB。
+速度榜的目標：超過它。優化空間實測存在（提示：把你的 boot log 和 Tools 選單看仔細）。
+
 ## 競賽規格（摘要）
 
 - **門檻**：裁判板上燒錄成功、seq_len=128 完整生成 100 tokens 不 crash、≥ 1 tok/s。
@@ -83,4 +87,5 @@ stories260K（Karpathy 預訓練，260K 參數），凍結驗證集 `eval/valida
 - [x] Firmware engine（`llm_engine.h`）：host 端已驗證與 runq 輸出逐字一致
 - [x] Arduino sketch + ESP-IDF 專案骨架（兩線共用 engine；**尚未上板實測**）
 - [x] Repo 上 GitHub、notebook 已填 URL（**repo 目前 private：開課前需轉 public，Colab 的 clone 才會通**）
-- [ ] 板上實測（Arduino / IDF 兩路線）→ 定案速度門檻
+- [x] Arduino 路線板上實測（19.67 tok/s baseline）；速度門檻定案 ≥1 tok/s（形式門檻，實質約束為 flash/RAM 預算）
+- [ ] ESP-IDF 側路線上板驗證

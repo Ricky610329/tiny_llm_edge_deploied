@@ -45,9 +45,14 @@ uv run python tools/export_header.py models/xxx_q80.bin models/tok512.bin  # →
 - Ground truth 數字（budget_calc `--check` 依據）：stories260K params 260,032、
   KV@T=128 = 163,840 B、Q8_0@GS=64 = 278,608 B。改 Config 或格式時要同步驗證。
 
+## 板子（已確認 2026-07-30）
+
+ESP32-D0WD-V3、WROOM 級無 PSRAM、4MB flash、COM7（CP210x）。**燒錄要手按 BOOT**。
+Arduino 路線板上實測：naive baseline **19.67 tok/s**、init 後 heap 剩 147KB（帳目與 budget_calc 吻合）。
+Gate 定案 ≥1 tok/s（形式門檻）。細節見 docs/course_design.md §2.6。
+
 ## 待辦
 
-- 板上實測（使用者自己測 Arduino 與 IDF 兩路線）；速度數字出來後定案競賽 Gate 門檻。
-- 使用者的 ESP32 型號未確認（可能無 PSRAM）；接上後用 `esptool.py flash_id` 認板子。
+- ESP-IDF 側路線尚未上板驗證（Arduino 路線已通）。
 - Repo：https://github.com/Ricky610329/tiny_llm_edge_deploied ——**目前 private**，
   開課前要轉 public（Colab notebook 的 `git clone` 才會通），或改發 token。

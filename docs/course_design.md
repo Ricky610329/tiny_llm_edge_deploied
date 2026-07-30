@@ -124,6 +124,23 @@ engine + model_data.h」，與 runq 同參數（`-t 0.8 -s 42 -n 100`）輸出**
 ~55 token 後取樣分岔（數值差 <1e-6，BPB 無感，但文字會不同）。build.sh 已用相同旗標。
 板上 Xtensa FPU 的捨入也可能有最後一位差異：品質榜計分以 host 端 `eval_bpb_q` 為準，速度榜在板上量。
 
+### 2.6 板上實測結果（2026-07-30，Arduino 路線）
+
+硬體：ESP32-D0WD-V3（WROOM 級、無 PSRAM、4MB flash、CP210x @COM7，
+**燒錄需手按 BOOT**——這塊板自動 reset 不靈，開課時要提醒學生）。
+
+- **速度：19.67 tok/s**（stories260K Q8_0 GS=4 = 509KB、naive engine、Tools 全預設）。
+  與參考影片在 S3 + 雙核 + SIMD + PSRAM 的 19 tok/s 相同——Q8_0 省下的 flash 流量
+  抵掉了對方全部優化。第 4 堂開場的好素材：「選對格式贏過拚命優化」。
+- **記憶體帳目**：free heap 336,728 → 147,380（Δ≈189KB = KV 163,840 + 緩衝/tokenizer ~25KB），
+  與 budget_calc 完全吻合；剩餘 147KB。開機 log 無 PSRAM 行 → worst case 確認。
+- **數值忠實度**：板上 seed 42 輸出與 host 非-FMA 編譯變體逐字一致（Xtensa 無 x86 式 FMA 融合，符合預期）。
+- **助教掌握、學生自己挖的優化空間**：boot log 顯示 `mode:DIO`（2-bit flash 匯流排）→
+  Tools 改 QIO/80MHz 頻寬翻倍；GS=64 的正規模型比這顆 GS=4 小一半 → 流量再省一半。
+  兩項合計 ~4× 空間，之後才輪到雙核與演算法層。實測有效頻寬 ≈ 10MB/s（509KB × 19.67）。
+- **Gate 定案：≥1 tok/s 維持**。塞得進 2MB flash 預算的最大模型估計仍有 ~4-5 tok/s，
+  所以速度門檻實質上不會刷人——真正的可部署性約束是 flash/RAM 預算，符合設計意圖。
+
 ## 3. 課程結構（4 堂課，CS336 極短版）
 
 每堂 2–3 小時（半講半做），課後各一份作業。假設新生會 Python、修過基礎 ML。
@@ -248,4 +265,5 @@ Ground truth（stories260K 實測，`--check` 用的就是這三個數）：para
 ### 風險與備案
 - **板子 RAM 比預期更小**（如只有 C3）：預算表整體下修（模型 ~10 萬參數、seq_len=64），課程結構不變——這正是 worst-case 設計的好處。
 - **新生沒有 GPU**：Colab 免費版足夠訓練這個量級；助教也可提供實驗室 GPU 排程。
-- **19 tok/s 的期望管理**：那是 S3 + SIMD + PSRAM 的數字。classic ESP32 走 flash mmap 會明顯慢，先實測再訂 Gate，避免新生以為自己做錯。
+- ~~19 tok/s 的期望管理~~ **已實測推翻**：classic ESP32 上 naive engine 就有 19.67 tok/s（見 §2.6）——
+  Q8_0 的頻寬優勢比預想大。期望管理反轉：要提醒學生 baseline 不慢，優化要動真格的才拉得開差距。
