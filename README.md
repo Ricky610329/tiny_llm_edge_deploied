@@ -7,7 +7,7 @@
 
 | 堂 | 主題 | 講義 |
 |---|---|---|
-| 1 | 語言模型在做什麼？（黑盒子玩法 + 評估指標） | [lecture1](docs/handouts/lecture1.md) |
+| 1 | 語言模型在做什麼？（黑盒子玩法 + 評估指標）［[開啟 Colab notebook](https://colab.research.google.com/github/Ricky610329/tiny_llm_edge_deploied/blob/main/notebooks/lecture1.ipynb)］ | [lecture1](docs/handouts/lecture1.md) |
 | 2 | 設計並訓練你的參賽模型（架構 + 預算） | [lecture2](docs/handouts/lecture2.md) |
 | 3 | 量化與推論系統 | [lecture3](docs/handouts/lecture3.md) |
 | 4 | 部署、優化、競賽 | [lecture4](docs/handouts/lecture4.md) |
@@ -82,5 +82,5 @@ stories260K（Karpathy 預訓練，260K 參數），凍結驗證集 `eval/valida
 - [x] 四堂課講義 + 作業骨架 + 第 1 堂 Colab notebook
 - [x] Firmware engine（`llm_engine.h`）：host 端已驗證與 runq 輸出逐字一致
 - [x] Arduino sketch + ESP-IDF 專案骨架（兩線共用 engine；**尚未上板實測**）
+- [x] Repo 上 GitHub、notebook 已填 URL（**repo 目前 private：開課前需轉 public，Colab 的 clone 才會通**）
 - [ ] 板上實測（Arduino / IDF 兩路線）→ 定案速度門檻
-- [ ] 把 repo 推上 GitHub、把 URL 填進 notebook（Colab clone 需要）

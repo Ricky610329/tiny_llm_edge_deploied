@@ -4,8 +4,9 @@
 
 有 Google 帳號就好。**這堂課不需要在自己電腦安裝任何東西。**
 
-打開課程 notebook：`notebooks/lecture1.ipynb`（用 Colab 開啟，助教會給連結），
-填入 repo URL 後 `Run all` 一次，確認每格都能跑。
+打開課程 notebook：
+[在 Colab 開啟 lecture1.ipynb](https://colab.research.google.com/github/Ricky610329/tiny_llm_edge_deploied/blob/main/notebooks/lecture1.ipynb)，
+`Run all` 一次，確認每格都能跑。
 
 ## 課堂示範（都在 notebook 裡）
 

@@ -49,4 +49,5 @@ uv run python tools/export_header.py models/xxx_q80.bin models/tok512.bin  # →
 
 - 板上實測（使用者自己測 Arduino 與 IDF 兩路線）；速度數字出來後定案競賽 Gate 門檻。
 - 使用者的 ESP32 型號未確認（可能無 PSRAM）；接上後用 `esptool.py flash_id` 認板子。
-- Repo 推上 GitHub 後，把 URL 填進 `notebooks/lecture1.ipynb`（Colab clone 需要）。
+- Repo：https://github.com/Ricky610329/tiny_llm_edge_deploied ——**目前 private**，
+  開課前要轉 public（Colab notebook 的 `git clone` 才會通），或改發 token。
